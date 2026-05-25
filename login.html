@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — FinPlan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="login.css">
+    <style>
+        .msg {
+            font-size: 0.82rem;
+            text-align: center;
+            padding: 0.6rem;
+            display: none;
+        }
+        .msg.erro {
+            background: rgba(220, 80, 80, 0.12);
+            border: 1px solid rgba(220, 80, 80, 0.4);
+            color: #e07070;
+        }
+        .msg.sucesso {
+            background: rgba(100, 200, 120, 0.12);
+            border: 1px solid rgba(100, 200, 120, 0.4);
+            color: #80c890;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hd">
+        <span class="logo">FinPlan</span>
+        <nav class="nav-links">
+            <a href="#about">Sobre</a>
+            <a href="#contact">Contato</a>
+            <a href="cadastro.html"><button class="btn-entrar">Cadastrar</button></a>
+        </nav>
+    </header>
+
+    <main class="main">
+        <div class="left-text">
+            <p class="tagline">Seu dinheiro,<br>seu controle.</p>
+            <p class="sub">Planeje, invista e acompanhe<br>seu futuro financeiro.</p>
+        </div>
+
+        <div class="box">
+            <h2 class="box-title">Acesse sua conta</h2>
+
+            <div class="msg" id="msg"></div>
+
+            <input type="email"    id="email" class="tex" placeholder="E-mail">
+            <input type="password" id="senha" class="tex" placeholder="Senha">
+
+            <button class="lg" id="btn-login">Login</button>
+            <p class="signup-link">Não tem conta? <a href="cadastro.html">Cadastre-se</a></p>
+        </div>
+    </main>
+
+    <div class="glow"></div>
+
+    <script>
+        function mostrarMsg(texto, tipo) {
+            const el = document.getElementById('msg');
+            el.textContent = texto;
+            el.className = `msg ${tipo}`;
+            el.style.display = 'block';
+        }
+
+        // Permite usar Enter para logar
+        document.getElementById('senha').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('btn-login').click();
+        });
+
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value;
+
+            if (!email || !senha) {
+                return mostrarMsg('Preencha e-mail e senha.', 'erro');
+            }
+
+            const btn = document.getElementById('btn-login');
+            btn.textContent = 'Entrando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                const dados = await res.json();
+
+                if (res.ok) {
+                    mostrarMsg('Bem-vindo! Redirecionando...', 'sucesso');
+                    // Guarda o nome do usuário para exibir no dashboard
+                    localStorage.setItem('usuario', dados.nome);
+                    // Redireciona para o site principal
+                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                } else {
+                    mostrarMsg(dados.erro || 'E-mail ou senha incorretos.', 'erro');
+                    btn.textContent = 'Login';
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                mostrarMsg('Não foi possível conectar ao servidor.', 'erro');
+                btn.textContent = 'Login';
+                btn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>
