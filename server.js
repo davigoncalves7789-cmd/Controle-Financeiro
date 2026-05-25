@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 // ─── Conexão com MongoDB ─────────────────────────────────────────────────────
-mongoose.connect('mongodb://davigoncalves7789_db_user:Dav1lindo!@ac-vwkuhra-shard-00-00.yvqlecc.mongodb.net:27017,ac-vwkuhra-shard-00-01.yvqlecc.mongodb.net:27017,ac-vwkuhra-shard-00-02.yvqlecc.mongodb.net:27017/finplan?ssl=true&replicaSet=atlas-yvqlecc-shard-0&authSource=admin')
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('✅ MongoDB conectado'))
     .catch(err => console.error('❌ Erro MongoDB:', err));
 // ─── Schema e Model do Usuário ────────────────────────────────────────────────
