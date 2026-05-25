@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — FinPlan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: rgb(239, 181, 100);
+            --gold-border: rgba(239, 181, 100, 0.35);
+            --bg: #080808;
+            --text: #f0e6d3;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            border-bottom: 1px solid var(--gold-border);
+        }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--gold);
+        }
+        .sair {
+            background: transparent;
+            border: 1px solid var(--gold-border);
+            color: rgba(240,230,211,0.6);
+            padding: 0.4rem 1.2rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sair:hover { border-color: var(--gold); color: var(--gold); }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 3rem;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold);
+        }
+        p { color: rgba(240,230,211,0.55); font-weight: 300; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="logo">FinPlan</span>
+        <button class="sair" id="btn-sair">Sair</button>
+    </header>
+
+    <main>
+        <h1>Olá, <span id="nome-usuario"></span>!</h1>
+        <p>Seu dashboard está sendo construído. Em breve você verá seus dados financeiros aqui.</p>
+    </main>
+
+    <script>
+        // Se não houver usuário logado, manda de volta ao login
+        const nome = localStorage.getItem('usuario');
+        if (!nome) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('nome-usuario').textContent = nome;
+        }
+
+        // Botão sair: limpa o storage e volta ao login
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro — FinPlan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="login.css">
+    <style>
+        .msg {
+            font-size: 0.82rem;
+            text-align: center;
+            padding: 0.6rem;
+            border-radius: 2px;
+            display: none;
+        }
+        .msg.erro {
+            background: rgba(220, 80, 80, 0.12);
+            border: 1px solid rgba(220, 80, 80, 0.4);
+            color: #e07070;
+        }
+        .msg.sucesso {
+            background: rgba(100, 200, 120, 0.12);
+            border: 1px solid rgba(100, 200, 120, 0.4);
+            color: #80c890;
+        }
+        .requisitos {
+            font-size: 0.75rem;
+            color: rgba(240, 230, 211, 0.3);
+            line-height: 1.6;
+            padding: 0 0.2rem;
+        }
+        .requisitos span {
+            display: block;
+            transition: color 0.2s;
+        }
+        .requisitos span.ok {
+            color: #80c890;
+        }
+        .requisitos span.ok::before { content: "✓ "; }
+        .requisitos span:not(.ok)::before { content: "· "; }
+    </style>
+</head>
+<body>
+
+    <header class="hd">
+        <span class="logo">FinPlan</span>
+        <nav class="nav-links">
+            <a href="#about">Sobre</a>
+            <a href="#contact">Contato</a>
+            <a href="login.html"><button class="btn-entrar">Entrar</button></a>
+        </nav>
+    </header>
+
+    <main class="main">
+        <div class="left-text">
+            <p class="tagline">Comece hoje.<br>Invista amanhã.</p>
+            <p class="sub">Crie sua conta gratuita e tenha<br>controle total das suas finanças.</p>
+        </div>
+
+        <div class="box" style="width: 400px;">
+            <h2 class="box-title">Criar conta</h2>
+
+            <div class="msg" id="msg"></div>
+
+            <input type="text"     id="nome"   class="tex" placeholder="Nome completo">
+            <input type="email"    id="email"  class="tex" placeholder="E-mail">
+            <input type="password" id="senha"  class="tex" placeholder="Senha">
+
+            <div class="requisitos" id="req">
+                <span id="r-len">Mínimo 7 caracteres</span>
+                <span id="r-mai">Uma letra maiúscula</span>
+                <span id="r-num">Um número</span>
+                <span id="r-sim">Um símbolo (!@#$%...)</span>
+            </div>
+
+            <input type="password" id="confirma" class="tex" placeholder="Confirmar senha">
+
+            <button class="lg" id="btn-cadastrar">Cadastrar</button>
+
+            <p class="signup-link">Já tem conta? <a href="login.html">Entrar</a></p>
+        </div>
+    </main>
+
+    <div class="glow"></div>
+
+    <script>
+        const senhaInput   = document.getElementById('senha');
+        const rLen = document.getElementById('r-len');
+        const rMai = document.getElementById('r-mai');
+        const rNum = document.getElementById('r-num');
+        const rSim = document.getElementById('r-sim');
+
+        // Valida requisitos da senha em tempo real
+        senhaInput.addEventListener('input', () => {
+            const v = senhaInput.value;
+            rLen.className = v.length >= 7           ? 'ok' : '';
+            rMai.className = /[A-Z]/.test(v)         ? 'ok' : '';
+            rNum.className = /[0-9]/.test(v)         ? 'ok' : '';
+            rSim.className = /[^a-zA-Z0-9]/.test(v) ? 'ok' : '';
+        });
+
+        function mostrarMsg(texto, tipo) {
+            const el = document.getElementById('msg');
+            el.textContent = texto;
+            el.className = `msg ${tipo}`;
+            el.style.display = 'block';
+        }
+
+        document.getElementById('btn-cadastrar').addEventListener('click', async () => {
+            const nome     = document.getElementById('nome').value.trim();
+            const email    = document.getElementById('email').value.trim();
+            const senha    = document.getElementById('senha').value;
+            const confirma = document.getElementById('confirma').value;
+
+            // Validações no front-end antes de chamar o servidor
+            if (!nome || !email || !senha || !confirma) {
+                return mostrarMsg('Preencha todos os campos.', 'erro');
+            }
+            if (senha.length < 7) {
+                return mostrarMsg('A senha precisa ter ao menos 7 caracteres.', 'erro');
+            }
+            if (!/[A-Z]/.test(senha)) {
+                return mostrarMsg('A senha precisa ter ao menos uma letra maiúscula.', 'erro');
+            }
+            if (!/[0-9]/.test(senha)) {
+                return mostrarMsg('A senha precisa ter ao menos um número.', 'erro');
+            }
+            if (!/[^a-zA-Z0-9]/.test(senha)) {
+                return mostrarMsg('A senha precisa ter ao menos um símbolo.', 'erro');
+            }
+            if (senha !== confirma) {
+                return mostrarMsg('As senhas não coincidem.', 'erro');
+            }
+
+            const btn = document.getElementById('btn-cadastrar');
+            btn.textContent = 'Cadastrando...';
+            btn.disabled = true;
+
+            try {
+                // Envia os dados para o servidor Express
+                const res = await fetch('/cadastro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+
+                const dados = await res.json();
+
+                if (res.ok) {
+                    mostrarMsg('Conta criada com sucesso! Redirecionando...', 'sucesso');
+                    // Redireciona para o login após 1.5 segundos
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                } else {
+                    mostrarMsg(dados.erro || 'Erro ao cadastrar.', 'erro');
+                    btn.textContent = 'Cadastrar';
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                mostrarMsg('Não foi possível conectar ao servidor.', 'erro');
+                btn.textContent = 'Cadastrar';
+                btn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>
