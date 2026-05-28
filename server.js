@@ -5,7 +5,7 @@ const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname)));
 
 // ── Conexão MongoDB ───────────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://<usuario>:<senha>@cluster0.yvqlecc.mongodb.net/finplan?retryWrites=true&w=majority';
@@ -275,7 +275,7 @@ app.post('/reset-dados', async (req, res) => {
 // (se você usar SPA ou quiser redirecionar rotas desconhecidas)
 // CORRETO para Express 5:
 app.get('/{*splat}', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  res.sendFile(path.join(__dirname, 'login.html'));
 });
 
 // ── Start ─────────────────────────────────────────────────────────
