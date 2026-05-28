@@ -1,94 +1,679 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — FinPlan</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --gold: rgb(239, 181, 100);
-            --gold-border: rgba(239, 181, 100, 0.35);
-            --bg: #080808;
-            --text: #f0e6d3;
-        }
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'DM Sans', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 3rem;
-            border-bottom: 1px solid var(--gold-border);
-        }
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            color: var(--gold);
-        }
-        .sair {
-            background: transparent;
-            border: 1px solid var(--gold-border);
-            color: rgba(240,230,211,0.6);
-            padding: 0.4rem 1.2rem;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.82rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .sair:hover { border-color: var(--gold); color: var(--gold); }
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            padding: 3rem;
-        }
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            color: var(--gold);
-        }
-        p { color: rgba(240,230,211,0.55); font-weight: 300; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — FinPlan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0f1e;
+      --surface: #111827;
+      --border:  #1e2d45;
+      --accent:  #00d4aa;
+      --accent2: #3b82f6;
+      --warn:    #f59e0b;
+      --danger:  #ef4444;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --radius:  14px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 5rem;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .logo { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 1rem; }
+    #user-email-top { font-size: .8rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: .4rem .9rem;
+      font-family: 'Sora', sans-serif;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ── Layout ── */
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: .3rem; }
+    .subtitle { color: var(--muted); font-size: .9rem; margin-bottom: 2rem; }
+
+    /* ── Cards topo ── */
+    .cards-top {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.6rem;
+    }
+    .card .label {
+      font-size: .74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      font-weight: 600;
+      margin-bottom: .5rem;
+    }
+    .card .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .card .value.green  { color: var(--accent); }
+    .card .value.blue   { color: var(--accent2); }
+    .card .value.yellow { color: var(--warn); }
+    .card .value.red    { color: var(--danger); }
+    .card .sub {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: .3rem;
+    }
+
+    /* ── Seção ── */
+    .section { margin-bottom: 2rem; }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Tabela de contas ── */
+    .contas-table { width: 100%; border-collapse: collapse; }
+    .contas-table th {
+      font-size: .74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      text-align: left;
+      padding: .5rem .8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .contas-table td {
+      padding: .7rem .8rem;
+      font-size: .92rem;
+      border-bottom: 1px solid rgba(30,45,69,.5);
+    }
+    .contas-table td:last-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      text-align: right;
+    }
+    .contas-table tr:last-child td { border-bottom: none; }
+
+    /* ── Tesouro Direto box ── */
+    .td-box {
+      background: linear-gradient(135deg, rgba(0,212,170,.07), rgba(59,130,246,.07));
+      border: 1px solid rgba(0,212,170,.2);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+    }
+    .td-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.4rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .td-badge {
+      background: rgba(0,212,170,.15);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: .25rem .7rem;
+      font-size: .78rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .td-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+    .td-metric .key {
+      font-size: .74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: .3rem;
+    }
+    .td-metric .val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+    }
+    .td-metric .val.blue { color: var(--accent2); }
+
+    /* ── Gráfico ── */
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .chart-wrap canvas { max-height: 300px; }
+
+    /* ── Reset button ── */
+    .reset-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 3rem;
+      gap: .8rem;
+    }
+    .btn-reset {
+      background: transparent;
+      border: 2px solid var(--danger);
+      color: var(--danger);
+      border-radius: 10px;
+      padding: .85rem 2.5rem;
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-reset:hover { background: rgba(239,68,68,.1); }
+    .reset-hint { font-size: .82rem; color: var(--muted); }
+
+    /* ── Modal Reset ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: min(400px, 90vw);
+      animation: fadeUp .3s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal h3 { margin-bottom: .4rem; font-size: 1.1rem; }
+    .modal p  { color: var(--muted); font-size: .88rem; margin-bottom: 1.4rem; }
+
+    .modal input[type="password"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: .95rem;
+      padding: .75rem 1rem;
+      outline: none;
+      margin-bottom: .6rem;
+      transition: border-color .2s;
+    }
+    .modal input:focus { border-color: var(--accent); }
+    .modal input.err  { border-color: var(--danger); }
+
+    .modal-err { color: var(--danger); font-size: .82rem; min-height: 1rem; margin-bottom: .8rem; }
+    .modal-btns { display: flex; gap: .7rem; }
+    .btn-cancel {
+      flex: 1;
+      padding: .75rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-size: .9rem;
+      cursor: pointer;
+    }
+    .btn-confirm-reset {
+      flex: 1;
+      padding: .75rem;
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-confirm-reset:hover { opacity: .85; }
+
+    /* ── Loading ── */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 1rem;
+    }
+    .spinner-lg {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #dashboard { display: none; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .75rem 1.4rem;
+      font-size: .9rem;
+      transition: transform .3s;
+      z-index: 200;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: var(--accent); color: var(--accent); }
+    #toast.error   { border-color: var(--danger); color: var(--danger); }
+
+    @media (max-width: 520px) {
+      .topbar { padding: .8rem 1rem; }
+      #user-email-top { display: none; }
+      .container { padding: 1.5rem 1rem; }
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <span class="logo">FinPlan</span>
-        <button class="sair" id="btn-sair">Sair</button>
-    </header>
+<!-- Topbar -->
+<nav class="topbar">
+  <div class="logo">FinPlan</div>
+  <div class="topbar-right">
+    <span id="user-email-top"></span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</nav>
 
-    <main>
-        <h1>Olá, <span id="nome-usuario"></span>!</h1>
-        <p>Seu dashboard está sendo construído. Em breve você verá seus dados financeiros aqui.</p>
-    </main>
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner-lg"></div>
+  <p style="color:var(--muted);font-size:.9rem;">Carregando seu painel...</p>
+</div>
 
-    <script>
-        // Se não houver usuário logado, manda de volta ao login
-        const nome = localStorage.getItem('usuario');
-        if (!nome) {
-            window.location.href = 'login.html';
-        } else {
-            document.getElementById('nome-usuario').textContent = nome;
+<!-- Dashboard -->
+<div class="container" id="dashboard">
+
+  <h1>Seu Painel Financeiro</h1>
+  <p class="subtitle" id="dash-subtitle">Visão geral das suas finanças pessoais</p>
+
+  <!-- Cards topo -->
+  <div class="cards-top">
+    <div class="card">
+      <div class="label">💰 Salário</div>
+      <div class="value green" id="c-salario">—</div>
+      <div class="sub">Renda mensal líquida</div>
+    </div>
+    <div class="card">
+      <div class="label">📊 Gastos Fixos</div>
+      <div class="value red" id="c-gastos">—</div>
+      <div class="sub">Despesas mensais totais</div>
+    </div>
+    <div class="card">
+      <div class="label">💸 Saldo Livre</div>
+      <div class="value blue" id="c-saldo">—</div>
+      <div class="sub">Salário − Gastos fixos</div>
+    </div>
+    <div class="card">
+      <div class="label">🎯 Objetivo</div>
+      <div class="value yellow" id="c-objetivo" style="font-size:1rem;">—</div>
+      <div class="sub" id="c-prazo">—</div>
+    </div>
+  </div>
+
+  <!-- Contas fixas -->
+  <div class="section">
+    <div class="section-title">Contas cadastradas</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="contas-table" id="contas-table">
+        <thead>
+          <tr>
+            <th>Conta</th>
+            <th style="text-align:right">Valor</th>
+          </tr>
+        </thead>
+        <tbody id="contas-body">
+          <tr><td colspan="2" style="color:var(--muted);text-align:center;padding:1rem;">Nenhuma conta cadastrada</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Investimento + Tesouro Direto -->
+  <div class="section">
+    <div class="section-title">Simulação — Tesouro Direto</div>
+    <div class="td-box">
+      <div class="td-header">
+        <div>
+          <p style="font-weight:700;margin-bottom:.3rem;">Tesouro SELIC / Prefixado</p>
+          <p style="font-size:.85rem;color:var(--muted);">Simulação com juros compostos mensais</p>
+        </div>
+        <span class="td-badge">12% a.a.</span>
+      </div>
+      <div class="td-metrics">
+        <div class="td-metric">
+          <div class="key">Aporte mensal</div>
+          <div class="val" id="td-aporte">—</div>
+        </div>
+        <div class="td-metric">
+          <div class="key">Prazo</div>
+          <div class="val" id="td-prazo">—</div>
+        </div>
+        <div class="td-metric">
+          <div class="key">Total investido</div>
+          <div class="val blue" id="td-investido">—</div>
+        </div>
+        <div class="td-metric">
+          <div class="key">Rendimento estimado</div>
+          <div class="val" id="td-rendimento">—</div>
+        </div>
+        <div class="td-metric">
+          <div class="key">Valor final estimado</div>
+          <div class="val" id="td-final" style="font-size:1.35rem;">—</div>
+        </div>
+      </div>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:1.2rem;">
+        ⚠️ Simulação baseada em 12% a.a. (1% a.m.) com juros compostos. Rentabilidade real pode variar. Não é recomendação de investimento.
+      </p>
+    </div>
+  </div>
+
+  <!-- Gráfico -->
+  <div class="section">
+    <div class="section-title">Distribuição financeira</div>
+    <div class="chart-wrap">
+      <canvas id="grafico"></canvas>
+    </div>
+  </div>
+
+  <!-- Reset -->
+  <div class="reset-section">
+    <p class="reset-hint">Mudou de ideia? Você pode refazer o planejamento a qualquer momento.</p>
+    <button class="btn-reset" onclick="abrirModalReset()">Resetar dados</button>
+  </div>
+
+</div><!-- /container -->
+
+<!-- Modal de confirmação de reset -->
+<div class="modal-overlay" id="modal-reset">
+  <div class="modal">
+    <h3>⚠️ Confirmar Reset</h3>
+    <p>Para redefinir seus dados financeiros, confirme sua senha abaixo. Esta ação não pode ser desfeita.</p>
+    <input type="password" id="reset-senha" placeholder="Sua senha" autocomplete="current-password" />
+    <p class="modal-err" id="modal-err"></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModalReset()">Cancelar</button>
+      <button class="btn-confirm-reset" onclick="confirmarReset()">Confirmar Reset</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const fmt = v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  let dadosFinanceiros = null;
+  let graficoInstance  = null;
+
+  // ── Auth ─────────────────────────────────────────────────────────
+  function getUserData() {
+    const raw = localStorage.getItem('finplan_user');
+    if (!raw) { window.location.href = '/login.html'; return null; }
+    return JSON.parse(raw);
+  }
+
+  function logout() {
+    localStorage.removeItem('finplan_user');
+    window.location.href = '/login.html';
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────
+  function showToast(msg, type = 'success') {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 3200);
+  }
+
+  // ── Buscar dados do servidor ──────────────────────────────────────
+  async function carregarDados() {
+    const user = getUserData();
+    if (!user) return;
+
+    $('user-email-top').textContent = user.email || '';
+
+    try {
+      const res = await fetch(`/dados-financeiros/${user.id}`);
+      if (res.status === 404) {
+        // Usuário não tem dados ainda — redireciona para formulário
+        window.location.href = '/formulario.html';
+        return;
+      }
+      if (!res.ok) throw new Error('Falha ao carregar dados');
+
+      dadosFinanceiros = await res.json();
+      renderizarDashboard(dadosFinanceiros);
+    } catch (err) {
+      showToast('Erro ao carregar dados: ' + err.message, 'error');
+    } finally {
+      $('loading').style.display = 'none';
+      $('dashboard').style.display = 'block';
+    }
+  }
+
+  // ── Renderizar ────────────────────────────────────────────────────
+  function renderizarDashboard(d) {
+    const saldo = d.salario - d.gastosFixos;
+
+    // Cards topo
+    $('c-salario').textContent  = fmt(d.salario);
+    $('c-gastos').textContent   = fmt(d.gastosFixos);
+    $('c-saldo').textContent    = fmt(saldo);
+    $('c-saldo').className      = `value ${saldo >= 0 ? 'blue' : 'red'}`;
+    $('c-objetivo').textContent = d.objetivo || '—';
+    $('c-prazo').textContent    = d.tempoPrazo ? `Prazo: ${d.tempoPrazo} meses` : '—';
+    $('dash-subtitle').textContent = `Objetivo: ${d.objetivo || '—'} · Prazo: ${d.tempoPrazo || 0} meses`;
+
+    // Tabela de contas
+    const tbody = $('contas-body');
+    if (d.contas && d.contas.length > 0) {
+      tbody.innerHTML = d.contas.map(c =>
+        `<tr><td>${c.nome}</td><td>${fmt(c.valor)}</td></tr>`
+      ).join('');
+    }
+
+    // Tesouro Direto — juros compostos mensais (1% a.m. = 12% a.a.)
+    const taxaMensal  = 0.01;
+    const meses       = d.tempoPrazo || 12;
+    const aporte      = d.investimento;
+    const totalInvest = aporte * meses;
+    // FV = PMT × [(1+i)^n − 1] / i
+    const fv = aporte * ((Math.pow(1 + taxaMensal, meses) - 1) / taxaMensal);
+    const rendimento  = fv - totalInvest;
+
+    $('td-aporte').textContent     = fmt(aporte);
+    $('td-prazo').textContent      = `${meses} meses`;
+    $('td-investido').textContent  = fmt(totalInvest);
+    $('td-rendimento').textContent = fmt(rendimento);
+    $('td-final').textContent      = fmt(fv);
+
+    // Gráfico
+    renderizarGrafico(d);
+  }
+
+  function renderizarGrafico(d) {
+    const ctx = $('grafico').getContext('2d');
+
+    if (graficoInstance) graficoInstance.destroy();
+
+    const saldo = Math.max(0, d.salario - d.gastosFixos - d.investimento);
+    const labels = ['Gastos Fixos', 'Investimento/mês', 'Saldo Restante'];
+    const valores = [d.gastosFixos, d.investimento, saldo];
+    const cores   = ['#ef4444', '#00d4aa', '#3b82f6'];
+
+    graficoInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Distribuição (R$)',
+          data: valores,
+          backgroundColor: cores.map(c => c + '88'),
+          borderColor: cores,
+          borderWidth: 2,
+          borderRadius: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => fmt(ctx.parsed.y),
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: '#1e2d45' },
+            ticks: { color: '#64748b', font: { family: 'Sora' } },
+          },
+          y: {
+            grid: { color: '#1e2d45' },
+            ticks: {
+              color: '#64748b',
+              font: { family: 'JetBrains Mono' },
+              callback: v => 'R$ ' + v.toLocaleString('pt-BR'),
+            }
+          }
         }
+      }
+    });
+  }
 
-        // Botão sair: limpa o storage e volta ao login
-        document.getElementById('btn-sair').addEventListener('click', () => {
-            localStorage.removeItem('usuario');
-            window.location.href = 'login.html';
-        });
-    </script>
+  // ── Modal Reset ───────────────────────────────────────────────────
+  function abrirModalReset() {
+    $('reset-senha').value = '';
+    $('modal-err').textContent = '';
+    $('reset-senha').classList.remove('err');
+    $('modal-reset').classList.add('open');
+    setTimeout(() => $('reset-senha').focus(), 100);
+  }
 
+  function fecharModalReset() {
+    $('modal-reset').classList.remove('open');
+  }
+
+  async function confirmarReset() {
+    const senha = $('reset-senha').value;
+    const errEl = $('modal-err');
+    errEl.textContent = '';
+    $('reset-senha').classList.remove('err');
+
+    if (!senha) {
+      errEl.textContent = 'Informe sua senha para continuar.';
+      $('reset-senha').classList.add('err');
+      return;
+    }
+
+    const user = getUserData();
+
+    try {
+      const res = await fetch('/reset-dados', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, senha }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        fecharModalReset();
+        showToast('Dados resetados com sucesso!', 'success');
+        // Limpa flag de dados e redireciona para formulário
+        const u = JSON.parse(localStorage.getItem('finplan_user'));
+        u.hasData = false;
+        localStorage.setItem('finplan_user', JSON.stringify(u));
+        setTimeout(() => window.location.href = '/formulario.html', 1200);
+      } else {
+        errEl.textContent = data.mensagem || 'Senha incorreta.';
+        $('reset-senha').classList.add('err');
+      }
+    } catch {
+      errEl.textContent = 'Erro de conexão. Tente novamente.';
+    }
+  }
+
+  // Fechar modal clicando fora
+  $('modal-reset').addEventListener('click', e => {
+    if (e.target === $('modal-reset')) fecharModalReset();
+  });
+
+  // Enter no campo de senha confirma
+  $('reset-senha').addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmarReset();
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────
+  carregarDados();
+</script>
 </body>
 </html>
